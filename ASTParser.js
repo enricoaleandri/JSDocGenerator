@@ -35,9 +35,11 @@ var ASTParser  = function() {
     ];
     return com;
   };
-  ASTParser.prototype.addCommentToFile = function (fn) {
+  ASTParser.prototype.addCommentToFile = function (fn,debugMode) {
     astparser = this;
     var ast = astparser.astFromFile(fn, true);
+    if(debugMode)
+      console.log("\n\n\nAST\n", JSON.stringify(ast));
     var output = estraverse.replace(ast, {
 
       enter: function (ast, parent) {
@@ -70,15 +72,29 @@ var ASTParser  = function() {
 
                 enter: function (astChild, parent) {
 
-                  switch (astChild.type) {
-                    case "ReturnStatement" : {
-                      //TODO - By default the type could be ANY '*', but we need to go over and try to find out the type
-                      attributes.push({ attributeName : "returns",
-                        args: {type : "*", description : astChild.argument.name}
-                      });
-                      break;
+                  if(astChild.type === "ReturnStatement" ) {
+                    //TODO - By default the type could be ANY '*', but we need to go over and try to find out the type
+                    switch (astChild.argument.type){
+                      case "Identifier" :{
+                        attributes.push({ attributeName : "returns",
+                          args: {type : "*", description : astChild.argument.name}
+                        });
+                        break;
+                      }
+                      case "CallExpression" :{
+                        attributes.push({ attributeName : "returns",
+                          args: {type : "*", description : "Invoking function"}
+                        });
+                        break;
+                      }
+                      case "FunctionExpression" :{
+                        attributes.push({ attributeName : "returns",
+                          args: {type : "Function", description : "Returning function"}
+                        });
+                        break;
+                      }
                     }
-                  }
+                  } // otherwire go over, no return has been found, so it could be a void Function
                 }
               });
               //pushing Function returns- END
@@ -96,6 +112,9 @@ var ASTParser  = function() {
       leave: function (ast, parent) {
       }
     });
+
+    if(debugMode)
+      console.log("\n\n\nAST_PARSED\n", JSON.stringify(output));
     return astparser.fileFromAst(output);
   };
 };

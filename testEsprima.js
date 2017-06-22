@@ -4,11 +4,14 @@
 var esprima = require( 'esprima' );
 var fs = require("fs");
 
-var file =  fs.readFileSync("./jsFile/simple.js","utf8");
-console.log(file);
+var fn = "./JSdocParser.js";
+if(process.argv[2]=="-f")
+  fn=process.argv[3]
+
+var file =  fs.readFileSync(fn,"utf8");
 var ast = esprima.parse(file,  { comment: true });
 
-console.log(ast);
+console.log(JSON.stringify(ast));
 
 
 /*
