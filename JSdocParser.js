@@ -6,9 +6,10 @@
 var JSdocParser  = function() {
   JSdocParser.prototype.attributes = {};
   JSdocParser.prototype.attributes.description = " * |#functionName#|";
-  JSdocParser.prototype.attributes.params = " * @params |#type#| |#name#| - |#description#|";
+  JSdocParser.prototype.attributes.param = " * @param {|#type#|} |#name#| - |#description#|";
+  JSdocParser.prototype.attributes.type = " * @type {|#type#|} |#name#| - |#description#|";
   JSdocParser.prototype.attributes.class = " * @class";
-  JSdocParser.prototype.attributes.returns = " * @returns |#type#| |#description#|";
+  JSdocParser.prototype.attributes.returns = " * @returns {|#type#|} |#description#|";
 
 
   JSdocParser.prototype.parseAttribute = function(attributeType, args){
@@ -19,7 +20,7 @@ var JSdocParser  = function() {
         var value = args[placeholder];
         switch(placeholder){
           case "type":{
-            value = "{"+value+"}";
+            value = value;
             break;
           }
         }
@@ -30,15 +31,20 @@ var JSdocParser  = function() {
       return ""; //No attributeType, so No template, I return empty string
     }
   };
-  JSdocParser.prototype.parseComment = function (allAttributes) {
+  JSdocParser.prototype.parseComment = function (allAttributes, location) {
     var blockComments = "*\n";
+    var space = "";
+    if(typeof location !== "undefined"
+      && typeof location.start !== "undefined"){
+      console.log("location.start.column", location.start.column);
+      space = Array(location.start.column-9).join(" "); // adding space to keep comment in line
+    }
     for(var i = 0; i<allAttributes.length ; i++){
       var attributeName = allAttributes[i].attributeName;
       var params = allAttributes[i].args;
-      blockComments+=this.parseAttribute(attributeName,params)+"\n";
+      blockComments+=space+this.parseAttribute(attributeName,params)+"\n";
     }
-    return blockComments
-
+    return blockComments+" ";
   };
 };
 module.exports = new JSdocParser();
