@@ -76,13 +76,13 @@ var ASTParser  = function() {
             }
 
             //pushing Function returns - BEGIN
-            //I'm going to entraverse the sub nodes of function, to find the ReturnStatemane
-            // OPENPOINT- what if there is another FunctionDeclaration in this function and it will find before the return on
-            //this sub function??
+            //I'm going to estraverse the sub nodes of function, to find the ReturnStatement
             estraverse.replace(ast,  {
 
               enter: function (astChild, parent) {
 
+                if (astChild.rewritten || astChild.noExpand)
+                  return;
                 if(astChild.type === "ReturnStatement" ) {
                   //TODO - By default the type could be ANY '*', but we need to go over and try to find out the type
                   switch (astChild.argument.type){
@@ -110,8 +110,10 @@ var ASTParser  = function() {
             });
             //pushing Function returns- END
             //generating comment string from tec attribute
-            var comment = jsdocparser.parseComment(attributes, ast.id.loc);
-            ast.leadingComments = astparser.generateBlockContent(comment,ast.id.loc.start);
+            if(attributes.length >0){//If we have no attributes to create comment, simply not create
+              var comment = jsdocparser.parseComment(attributes, ast.id.loc);
+              ast.leadingComments = astparser.generateBlockContent(comment,ast.id.loc.start);
+            }
             return ast;
             break;
           }
@@ -152,13 +154,13 @@ var ASTParser  = function() {
                   }
 
                   //pushing Function returns - BEGIN
-                  //I'm going to entraverse the sub nodes of function, to find the ReturnStatemane
-                  // OPENPOINT- what if there is another FunctionDeclaration in this function and it will find before the return on
-                  //this sub function??
+                  //I'm going to entraverse the sub nodes of function, to find the ReturnStatement
                   estraverse.replace(ast,  {
 
                     enter: function (astChild, parent) {
 
+                      if (astChild.rewritten || astChild.noExpand)
+                        return;
                       if(astChild.type === "ReturnStatement" ) {
                         //TODO - By default the type could be ANY '*', but we need to go over and try to find out the type
                         switch (astChild.argument.type){
@@ -191,9 +193,11 @@ var ASTParser  = function() {
             }//END - For all declaration
 
             //generating comment string from tec attribute
-            ast.loc.start.column+=9; // compensing comment tabulation in JSDocParser
-            var comment = jsdocparser.parseComment(attributes, ast.loc);
-            ast.leadingComments = astparser.generateBlockContent(comment,ast.loc.start);
+            if(attributes.length >0) {//If we have no attributes to create comment, simply not create
+              ast.loc.start.column += 9; // compensing comment tabulation in JSDocParser
+              var comment = jsdocparser.parseComment(attributes, ast.loc);
+              ast.leadingComments = astparser.generateBlockContent(comment, ast.loc.start);
+            }
             return ast;
             break;
           }//END - VariableDeclaration

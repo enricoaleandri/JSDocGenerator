@@ -18,12 +18,6 @@ var JSdocParser  = function() {
       for(var i = 0; i < Object.keys(args).length ; i++){
         var placeholder = Object.keys(args)[i];
         var value = args[placeholder];
-        switch(placeholder){
-          case "type":{
-            value = value;
-            break;
-          }
-        }
         template = template.replace("|#"+placeholder+"#|", value);
       }
       return template.replace(/\|#(\w+)#\|/g, ""); // after replaced all params provided, I'm gona remove all the rest before return it
@@ -36,7 +30,6 @@ var JSdocParser  = function() {
     var space = "";
     if(typeof location !== "undefined"
       && typeof location.start !== "undefined"){
-      console.log("location.start.column", location.start.column);
       space = Array(location.start.column-9).join(" "); // adding space to keep comment in line
     }
     for(var i = 0; i<allAttributes.length ; i++){
